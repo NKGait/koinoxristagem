@@ -518,6 +518,7 @@ function CalculationEngine({ buildingId, building }: { buildingId: string, build
         if (e.category === 'heating') totals.heating += e.amount;
         if (e.category === 'elevator') totals.elevator += e.amount;
         if (e.category === 'special') totals.special += e.amount;
+        if (e.category === 'other') totals.common += e.amount;
         totals.total += e.amount;
     });
 
@@ -564,7 +565,7 @@ function CalculationEngine({ buildingId, building }: { buildingId: string, build
           <div>
             <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Υπολογισμός Κατανομής</h2>
             <div className="flex gap-4 mt-2 font-bold text-sky-600 bg-sky-50 px-4 py-2 rounded-xl w-fit border border-sky-100 uppercase text-xs tracking-widest">
-               {format(new Date(2025, currentMonth-1), 'MMMM yyyy', { locale: el })}
+               {format(new Date(currentYear, currentMonth-1), 'MMMM yyyy', { locale: el })}
             </div>
           </div>
           <button 
@@ -692,7 +693,7 @@ function HistoryViewer({ buildingId }: { buildingId: string }) {
                      </div>
                      <div>
                         <h4 className="text-2xl font-black text-slate-900 tracking-tight mb-1">
-                          {format(new Date(2025, h.month-1), 'MMMM yyyy', { locale: el })}
+                          {format(new Date(h.year, h.month-1), 'MMMM yyyy', { locale: el })}
                         </h4>
                         <p className="text-xs text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2 italic">
                           <History size={12} />
