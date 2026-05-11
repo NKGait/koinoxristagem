@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 0. Global Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(ownerId) {
+      return isSignedIn() && request.auth.uid == ownerId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Validations ---
+
+    function isValidBuilding(data) {
+      return data.keys().hasAll(['name', 'address', 'ownerId']) 
+        && data.keys().size() >= 3
+        && data.name is string && data.name.size() <= 200
+        && data.address is string && data.address.size() <= 300
+        && data.ownerId == request.auth.uid;
+    }
+
+    function isValidApartment(data) {
+      return data.keys().hasAll(['buildingId', 'number', 'sharesCommon'])
+        && data.number is string && data.number.size() <= 50
+        && data.sharesCommon is number && data.sharesCommon >= 0
+        && (data.get('sharesHeating', 0) is number)
+        && (data.get('sharesElevator', 0) is number);
+    }
+
+    function isValidExpense(data) {
+      return data.keys().hasAll(['buildingId', 'month', 'year', 'category', 'amount'])
+        && data.month is int && data.month >= 1 && data.month <= 12
+        && data.year is int && data.year >= 2000 && data.year <= 2100
+        && data.amount is number && data.amount >= 0
+        && data.category in ['common', 'heating', 'elevator', 'special', 'other'];
+    }
+
+    // --- Master Gates ---
+
+    match /buildings/{buildingId} {
+      // Allow user to list and get their own buildings
+      allow read: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      
+      // Allow building creation if data is valid
+      allow create: if isSignedIn() && isValidBuilding(incoming());
+        
+      // Allow update and delete if user is the owner
+      allow update: if isSignedIn() 
+        && existing().ownerId == request.auth.uid
+        && isValidBuilding(incoming())
+        && incoming().ownerId == existing().ownerId
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['name', 'address', 'updatedAt'])
+        );
+        
+      allow delete: if isSignedIn() && existing().ownerId == request.auth.uid;
+
+      // Subcollections
+      
+      match /apartments/{aptId} {
+        allow read: if isSignedIn() && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid;
+        allow create: if isSignedIn() 
+          && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid
+          && isValidApartment(incoming());
+        allow update: if isSignedIn()
+          && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid
+          && isValidApartment(incoming());
+        allow delete: if isSignedIn() && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid;
+      }
+
+      match /expenses/{expId} {
+        allow read: if isSignedIn() && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid;
+        allow create: if isSignedIn()
+          && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid
+          && isValidExpense(incoming());
+        allow update: if isSignedIn()
+          && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid
+          && isValidExpense(incoming());
+        allow delete: if isSignedIn() && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid;
+      }
+
+      match /calculations/{calcId} {
+        allow read: if isSignedIn() && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid;
+        allow create: if isSignedIn()
+          && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid;
+        // Calculations are usually snapshots, update/delete might be restricted
+        allow update, delete: if isSignedIn() && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid;
+      }
+    }
+  }
+}

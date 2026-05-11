@@ -1,0 +1,81 @@
+{
+  "entities": {
+    "Building": {
+      "title": "Building",
+      "description": "A residential building managed by a user.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name or identifier of the building" },
+        "address": { "type": "string", "description": "Physical address" },
+        "ownerId": { "type": "string", "description": "The UID of the administrator who created it" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "address", "ownerId"]
+    },
+    "Apartment": {
+      "title": "Apartment",
+      "description": "An individual unit within a building with its share percentages.",
+      "type": "object",
+      "properties": {
+        "buildingId": { "type": "string" },
+        "number": { "type": "string", "description": "Apartment number (e.g., A1, 101)" },
+        "ownerName": { "type": "string" },
+        "tenantName": { "type": "string" },
+        "sharesCommon": { "type": "number", "description": "Χιλιοστά Κοινοχρήστων (e.g., 50.00)" },
+        "sharesHeating": { "type": "number", "description": "Χιλιοστά Θέρμανσης" },
+        "sharesElevator": { "type": "number", "description": "Χιλιοστά Ανελκυστήρα" },
+        "sharesSpecial": { "type": "number", "description": "Ειδικά χιλιοστά" },
+        "email": { "type": "string", "format": "email" }
+      },
+      "required": ["buildingId", "number", "sharesCommon"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "An expense logged for a specific building and period.",
+      "type": "object",
+      "properties": {
+        "buildingId": { "type": "string" },
+        "month": { "type": "integer", "description": "1-12" },
+        "year": { "type": "integer" },
+        "category": { "type": "string", "enum": ["common", "heating", "elevator", "special", "other"] },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string", "format": "date" }
+      },
+      "required": ["buildingId", "month", "year", "category", "amount"]
+    },
+    "Calculation": {
+      "title": "Calculation",
+      "description": "Snapshot of calculated costs for a building during a period.",
+      "type": "object",
+      "properties": {
+        "buildingId": { "type": "string" },
+        "month": { "type": "integer" },
+        "year": { "type": "integer" },
+        "results": { "type": "object", "description": "Map of apartmentId to calculated amounts" },
+        "totals": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["buildingId", "month", "year", "results"]
+    }
+  },
+  "firestore": {
+    "buildings": {
+      "schema": "Building",
+      "description": "List of buildings"
+    },
+    "buildings/{buildingId}/apartments": {
+      "schema": "Apartment",
+      "description": "Units for a specific building"
+    },
+    "buildings/{buildingId}/expenses": {
+      "schema": "Expense",
+      "description": "Expenses for a specific building"
+    },
+    "buildings/{buildingId}/calculations": {
+      "schema": "Calculation",
+      "description": "History of monthly calculations"
+    }
+  }
+}
