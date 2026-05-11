@@ -11,7 +11,7 @@ export const generateBillPDF = (
   year: number
 ) => {
   const doc = new jsPDF();
-  const monthName = format(new Date(2025, month - 1), 'MMMM yyyy', { locale: el });
+  const monthName = format(new Date(year, month - 1), 'MMMM yyyy', { locale: el });
 
   // Header
   doc.setFontSize(22);

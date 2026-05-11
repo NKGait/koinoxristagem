@@ -5,7 +5,6 @@ import {
   Calculator, 
   FileText, 
   Users, 
-  ShieldCheck, 
   LayoutDashboard,
   ArrowRight,
   Mail,
