@@ -47,7 +47,8 @@ service cloud.firestore {
         && data.number is string && data.number.size() <= 50
         && data.sharesCommon is number && data.sharesCommon >= 0
         && (data.get('sharesHeating', 0) is number)
-        && (data.get('sharesElevator', 0) is number);
+        && (data.get('sharesElevator', 0) is number)
+        && (data.get('sharesSpecial', 0) is number);
     }
 
     function isValidExpense(data) {

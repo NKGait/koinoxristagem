@@ -612,6 +612,7 @@ function CalculationEngine({ buildingId, building }: { buildingId: string, build
                             <th className="px-10 py-6">Κοινόχρ.</th>
                             <th className="px-10 py-6">Θέρμανσ.</th>
                             <th className="px-10 py-6">Ανελκ.</th>
+                            <th className="px-10 py-6">Ειδικά</th>
                             <th className="px-10 py-6 text-right">Σύνολο</th>
                             <th className="px-10 py-6 text-right">Bill</th>
                          </tr>
@@ -626,6 +627,7 @@ function CalculationEngine({ buildingId, building }: { buildingId: string, build
                                <td className="px-10 py-6 font-mono text-slate-500">{results.apartments[apt.id].common.toFixed(2)} €</td>
                                <td className="px-10 py-6 font-mono text-slate-500">{results.apartments[apt.id].heating.toFixed(2)} €</td>
                                <td className="px-10 py-6 font-mono text-slate-500">{results.apartments[apt.id].elevator.toFixed(2)} €</td>
+                               <td className="px-10 py-6 font-mono text-slate-500">{results.apartments[apt.id].special.toFixed(2)} €</td>
                                <td className="px-10 py-6 text-right font-black text-slate-900 tracking-tighter text-lg">{results.apartments[apt.id].total.toFixed(2)} <span className="text-xs text-slate-300">€</span></td>
                                <td className="px-10 py-6 text-right">
                                   <button 
