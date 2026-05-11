@@ -1,7 +1,7 @@
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { motion, AnimatePresence } from 'motion/react';
-import { LogIn, Building2, X } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Building2, X } from 'lucide-react';
 
 interface AuthProps {
   onClose: () => void;

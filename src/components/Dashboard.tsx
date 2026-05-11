@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User as FirebaseUser, signOut } from 'firebase/auth';
-import { collection, query, where, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc, updateDoc, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, updateDoc, getDocs } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Building, Apartment, Expense, Calculation, ExpenseCategory } from '../types';
 import { 
@@ -318,6 +318,7 @@ function ApartmentManager({ buildingId }: { buildingId: string }) {
                      <th className="px-10 py-6">Κοινόχρ.</th>
                      <th className="px-10 py-6">Θέρμανσ.</th>
                      <th className="px-10 py-6">Ανελκ.</th>
+                     <th className="px-10 py-6">Ειδικά</th>
                      <th className="px-10 py-6 text-right">Ενέργειες</th>
                   </tr>
                </thead>
@@ -344,9 +345,11 @@ const AptRow = ({ apt, buildingId }: any) => {
     try {
       await updateDoc(doc(db, 'buildings', buildingId, 'apartments', apt.id), {
         ownerName: data.ownerName,
+        tenantName: data.tenantName,
         sharesCommon: Number(data.sharesCommon),
         sharesHeating: Number(data.sharesHeating),
-        sharesElevator: Number(data.sharesElevator)
+        sharesElevator: Number(data.sharesElevator),
+        sharesSpecial: Number(data.sharesSpecial)
       });
       setEditing(false);
     } catch(e) { console.error(e); }
@@ -357,7 +360,8 @@ const AptRow = ({ apt, buildingId }: any) => {
        <tr className="bg-sky-50/30">
           <td className="px-10 py-6 font-black text-sky-600">{apt.number}</td>
           <td className="px-10 py-6">
-             <input value={data.ownerName} onChange={e => setData({...data, ownerName: e.target.value})} className="w-full border-b-2 border-sky-100 bg-transparent focus:outline-none focus:border-sky-500 font-bold text-sm transition-all" placeholder="Ονοματεπώνυμο" />
+             <input value={data.ownerName} onChange={e => setData({...data, ownerName: e.target.value})} className="w-full border-b-2 border-sky-100 bg-transparent focus:outline-none focus:border-sky-500 font-bold text-sm transition-all mb-2" placeholder="Ιδιοκτήτης" />
+             <input value={data.tenantName} onChange={e => setData({...data, tenantName: e.target.value})} className="w-full border-b-2 border-sky-100 bg-transparent focus:outline-none focus:border-sky-500 font-bold text-sm transition-all" placeholder="Ένοικος" />
           </td>
           <td className="px-10 py-6">
              <input type="number" value={data.sharesCommon} onChange={e => setData({...data, sharesCommon: Number(e.target.value)})} className="w-16 border-b-2 border-sky-100 bg-transparent focus:outline-none focus:border-sky-500 font-mono font-bold text-sm transition-all" />
@@ -367,6 +371,9 @@ const AptRow = ({ apt, buildingId }: any) => {
           </td>
           <td className="px-10 py-6">
              <input type="number" value={data.sharesElevator} onChange={e => setData({...data, sharesElevator: Number(e.target.value)})} className="w-16 border-b-2 border-sky-100 bg-transparent focus:outline-none focus:border-sky-500 font-mono font-bold text-sm transition-all" />
+          </td>
+          <td className="px-10 py-6">
+             <input type="number" value={data.sharesSpecial} onChange={e => setData({...data, sharesSpecial: Number(e.target.value)})} className="w-16 border-b-2 border-sky-100 bg-transparent focus:outline-none focus:border-sky-500 font-mono font-bold text-sm transition-all" />
           </td>
           <td className="px-10 py-6 text-right space-x-2">
              <button onClick={save} className="text-emerald-600 font-black text-[10px] uppercase tracking-widest bg-emerald-50 px-4 py-2 rounded-xl hover:bg-emerald-100 transition-colors cursor-pointer">Save</button>
@@ -379,10 +386,14 @@ const AptRow = ({ apt, buildingId }: any) => {
   return (
     <tr className="hover:bg-slate-50/50 transition-colors group">
        <td className="px-10 py-8 font-black text-slate-900">{apt.number}</td>
-       <td className="px-10 py-8 font-bold text-sm text-slate-600">{apt.ownerName || <span className="text-slate-300 italic font-medium opacity-50">Χωρίς Όνομα</span>}</td>
+       <td className="px-10 py-8">
+          <div className="font-bold text-sm text-slate-600">{apt.ownerName || <span className="text-slate-300 italic font-medium opacity-50">Χωρίς Όνομα</span>}</div>
+          {apt.tenantName && <div className="text-xs text-slate-400 mt-1">{apt.tenantName}</div>}
+       </td>
        <td className="px-10 py-8 font-mono text-sm font-bold text-slate-500">{apt.sharesCommon}‰</td>
        <td className="px-10 py-8 font-mono text-sm font-bold text-slate-500">{apt.sharesHeating}‰</td>
        <td className="px-10 py-8 font-mono text-sm font-bold text-slate-500">{apt.sharesElevator}‰</td>
+       <td className="px-10 py-8 font-mono text-sm font-bold text-slate-500">{apt.sharesSpecial}‰</td>
        <td className="px-10 py-8 text-right opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="flex justify-end gap-2 text-slate-300">
             <button onClick={() => setEditing(true)} className="p-3 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all cursor-pointer"><Settings size={18} /></button>

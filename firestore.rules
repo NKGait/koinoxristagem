@@ -106,8 +106,8 @@ service cloud.firestore {
         allow read: if isSignedIn() && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid;
         allow create: if isSignedIn()
           && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid;
-        // Calculations are usually snapshots, update/delete might be restricted
-        allow update, delete: if isSignedIn() && get(/databases/$(database)/documents/buildings/$(buildingId)).data.ownerId == request.auth.uid;
+        // Calculations are immutable snapshots
+        allow update, delete: if false;
       }
     }
   }
